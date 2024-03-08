@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: Token Generation API
+  description: API for generating access tokens
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /courses:
+    get:
+      summary: Accesses a protected resource
+      responses:
+        "200":
+          description: A list of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "404":
+          description: Course not found
+      security:
+        - bearerAuth: []
+
+    post:
+      summary: Create a new course
+      description: Create a new course with provided details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Course"
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - bearerAuth: []
+  /courses/{courseid}:
+    get:
+      summary: Get course by ID
+      description: Retrieve a course by its ID
+      parameters:
+        - in: path
+          name: courseid
+          required: true
+          description: ID of the course to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "404":
+          description: Course not found
+      security:
+        - bearerAuth: []
+    delete:
+      summary: Delete course by ID
+      description: Delete a course by its ID
+      parameters:
+        - in: path
+          name: courseid
+          required: true
+          description: ID of the course to delete
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Course not found
+      security:
+        - bearerAuth: []
+    put:
+      summary: Update course by ID
+      description: Update a course by its ID with new details
+      parameters:
+        - in: path
+          name: courseid
+          required: true
+          description: ID of the course to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Course"
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - bearerAuth: []
+  /register:
+    post:
+      summary: Generate Access Token
+      description: Generates an access token for authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: User's username
+      responses:
+        "200":
+          description: Access token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    description: Generated access token
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating the cause of the error
+
+components:
+  schemas:
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the course
+        name:
+          type: string
+          description: Name of the course
+        description:
+          type: string
+          description: Description of the course
+    Error:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          description: Error code indicating the type of error
+        message:
+          type: string
+          description: Error message describing the error
+        details:
+          type: object
+          description: Additional details about the error
+      required:
+        - message
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
